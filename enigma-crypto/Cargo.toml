@@ -32,5 +32,5 @@ asymmetric = ["libsecp256k1", "hash"]
 hash = ["sha2", "tiny-keccak"]
 symmetric = []
 # both regular std and sgx will import symmetric encryption.
-std = ["rand_std", "enigma-types/std", "ring/default", "symmetric"]
-sgx = ["sgx_trts", "sgx_tstd", "sgx_types", "enigma-types/sgx", "ring/sgx", "symmetric"]
+std = ["rand_std", "enigma-types/std", "symmetric"]
+sgx = ["sgx_trts", "sgx_tstd", "sgx_types", "enigma-types/sgx", "symmetric"]
