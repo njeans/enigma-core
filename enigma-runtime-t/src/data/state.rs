@@ -6,7 +6,7 @@ use enigma_types::Hash256;
 use json_patch;
 use rmps::{Deserializer, Serializer};
 use serde::{Deserialize, Serialize};
-use serde_json::{from_value, Error, Value};
+use serde_json::{from_value, Error, Value };
 use std::string::ToString;
 use std::vec::Vec;
 use data::EncryptedPatch;
