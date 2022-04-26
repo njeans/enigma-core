@@ -8,6 +8,7 @@ use std::str;
 use std::string::{String, ToString};
 use wasmi::{self, TrapKind};
 use parity_wasm;
+use rmp_serde;
 
 /// Error of WASM execution by wasmi or runtime
 #[derive(Debug)]

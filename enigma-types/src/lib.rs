@@ -1,5 +1,6 @@
 #![cfg_attr(all(not(feature = "std"), not(test)), no_std)]
 #![deny(unused_extern_crates, missing_docs, warnings)]
+
 //! # Enigma Types
 //! This library is meant to supply all the types that are specific to our protocol. <br>
 //! Inside of this library I abstracted the std as `localstd` so that you can use it without knowing if it's `sgx_tstd` or regular std.

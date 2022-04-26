@@ -67,9 +67,9 @@ impl Sha256<Hash256> for [u8] {
     fn sha256(&self) -> Hash256 {
         use sha2::Digest;
         let mut hasher = sha2::Sha256::new();
-        hasher.input(&self);
+        hasher.update(&self);
         let mut result = Hash256::default();
-        result.copy_from_slice(&hasher.result());
+        result.copy_from_slice(&hasher.finalize());
         result
     }
 }

@@ -5,7 +5,7 @@
 name = "enigma-crypto"
 version = "0.3.0"
 authors = ["Elichai Turkel <elichai@enigma.co>"]
-edition = "2018"
+edition = "2021"
 description = "A Cryptography library used for easy usage in the Enigma Protocol."
 
 [dependencies]
@@ -14,15 +14,20 @@ rustc-hex = { version = "2.0.1", default-features = false }
 failure = { version = "0.1", default-features = false, features = ["derive"] }
 
 tiny-keccak = { version = "1.4", optional = true }
-sha2 = { version = "0.8.0", default-features = false, optional = true }
-libsecp256k1 = { version = "0.7.0", optional = true }
-ring = { git = "https://github.com/elichai/ring.git", rev = "sgx-0.14.6", default-features = false, optional = true }
+sha2 = { version = "0.9", default-features = false, optional = true }
+# libsecp256k1 = { package = "secp256k1-sgx", git = "https://github.com/njeans/rust-secp256k1-sgx.git", optional = true }
+
+libsecp256k1 = { version = "0.7.0", git = "https://github.com/njeans/libsecp256k1.git", default-features = false, features = ["hmac", "static-context"], optional = true }
+# ring = { git = "https://github.com/elichai/ring.git", rev = "sgx-0.14.6", default-features = false, optional = true }
+# ring = { git = "https://github.com/njeans/ring", optional = true }
+ring_std = {package = "ring", version = "0.16.5", optional = true }
+ring_sgx = {package = "ring", git = "https://github.com/mesalock-linux/ring-sgx", tag = "v0.16.5", optional = true }
 
 rand_std = { package = "rand", version = "0.6.4", optional = true }
 
-sgx_tstd = { git = "https://github.com/baidu/rust-sgx-sdk.git", rev = "v1.0.9", optional = true }
-sgx_trts = { git = "https://github.com/baidu/rust-sgx-sdk.git", rev = "v1.0.9", optional = true }
-sgx_types = { git = "https://github.com/baidu/rust-sgx-sdk.git", rev = "v1.0.9", optional = true }
+sgx_tstd = { git = "https://github.com/apache/teaclave-sgx-sdk.git",  optional = true }
+sgx_trts = { git = "https://github.com/apache/teaclave-sgx-sdk.git",  optional = true }
+sgx_types = { git = "https://github.com/apache/teaclave-sgx-sdk.git", optional = true }
 
 
 # Right now symmetric encryption requires regular std or sgx std.
@@ -32,5 +37,5 @@ asymmetric = ["libsecp256k1", "hash"]
 hash = ["sha2", "tiny-keccak"]
 symmetric = []
 # both regular std and sgx will import symmetric encryption.
-std = ["rand_std", "enigma-types/std", "ring/default", "symmetric"]
-sgx = ["sgx_trts", "sgx_tstd", "sgx_types", "enigma-types/sgx", "ring/sgx", "symmetric"]
+std = ["rand_std", "enigma-types/std", "ring_std", "symmetric"]
+sgx = ["sgx_trts", "sgx_tstd", "sgx_types", "enigma-types/sgx", "ring_sgx", "symmetric"]

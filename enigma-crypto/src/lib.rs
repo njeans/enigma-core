@@ -7,9 +7,16 @@
 //! It also works in  WASM, but without the symmetric encryption, because `ring` uses AES-NI instructions which are x86(64) only. <br>
 //!
 //! Inside of this library I abstracted the std as `localstd` so that you can use it without knowing if it's `sgx_tstd` or regular std.
-//!
-//! This crate is Rust 2018 Edition,
-//! meaning there's no `extern crate` and `use` statements need to start with `crate`/`self`/`super`.
+
+// #[macro_use]
+
+#[cfg(feature = "std")]
+use {ring_std as ring};
+
+#[cfg(feature = "sgx")]
+use {ring_sgx as ring};
+
+
 
 #[cfg(feature = "asymmetric")]
 pub mod asymmetric;
@@ -20,6 +27,8 @@ pub mod rand;
 
 #[cfg(feature = "symmetric")]
 pub mod symmetric;
+// #[cfg(feature = "symmetric")]
+// extern crate ring;
 
 #[cfg(feature = "sgx")]
 use {
@@ -35,10 +44,13 @@ use {
 #[cfg(all(not(feature = "std"), not(feature = "sgx")))]
 extern crate core as localstd;
 
+
+
 pub use crate::error::CryptoError;
 
 #[cfg(feature = "asymmetric")]
 pub use crate::asymmetric::KeyPair;
+
 
 
 

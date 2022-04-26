@@ -22,6 +22,7 @@ extern crate hexutil;
 extern crate rlp;
 extern crate wasmi;
 extern crate rustc_hex;
+extern crate rmp_serde;
 
 #[macro_use]
 pub mod macros;

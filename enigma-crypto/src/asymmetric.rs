@@ -10,10 +10,10 @@
 //! Here is a PoC of how it can be done easily (and the one problem with it) https://github.com/enigmampc/enigma-core/pull/167
 
 use crate::error::CryptoError;
-use secp256k1::{PublicKey, SecretKey, SharedSecret,  RecoveryId, Signature};
+use libsecp256k1::{PublicKey, SecretKey, SharedSecret,  RecoveryId, Signature};
 use crate::hash::Keccak256;
 use enigma_types::{DhKey, PubKey};
-
+use sha2;
 
 /// The `KeyPair` struct is used to hold a Private and Public keys.
 /// you can use it to sign a message, to derive shared secrets(ECDH) etc.
@@ -63,7 +63,7 @@ impl KeyPair {
         let pubkey = PublicKey::parse(&pubarr)
             .map_err(|e| CryptoError::KeyError { key_type: "Private Key", err: Some(e) })?;
 
-        let shared = SharedSecret::new(&pubkey, &self.privkey)
+        let shared: SharedSecret<sha2::Sha256> = SharedSecret::new(&pubkey, &self.privkey)
             .map_err(|_| CryptoError::DerivingKeyError { self_key: self.get_pubkey(), other_key: *_pubarr })?;
 
         let mut result = [0u8; 32];
@@ -117,10 +117,10 @@ impl KeyPair {
     /// Interface for usage without forcing a keccak hash of the input. However, the input must be 32 bytes long.
     /// Mainly useful for when the data is created already hashed and we just want to sign it
     pub fn sign_hashed(&self, message: &[u8; 32]) -> Result<[u8; 65], CryptoError> {
-        let message_to_sign = secp256k1::Message::parse(message);
+        let message_to_sign = libsecp256k1::Message::parse(message);
 
-        let (sig, recovery) = secp256k1::sign(&message_to_sign, &self.privkey)
-            .map_err(|_| CryptoError::SigningError { hashed_msg: *message })?;
+        let (sig, recovery) = libsecp256k1::sign(&message_to_sign, &self.privkey);
+            // .map_err(|_| CryptoError::SigningError { hashed_msg: *message })?;
 
         let v: u8 = recovery.into();
         let mut returnvalue = [0u8; 65];
@@ -142,12 +142,12 @@ impl KeyPair {
     pub fn recover(message: &[u8], sig: [u8;65]) -> Result<[u8; 64], CryptoError> {
         let recovery = RecoveryId::parse(sig[64] -27)
             .map_err(|_| CryptoError::ParsingError { sig })?;
-        let signature = Signature::parse_slice(&sig[..64])
+        let signature = Signature::parse_standard_slice(&sig[..64])
             .map_err(|_| CryptoError::ParsingError { sig } )?;
         let hashed_msg = message.keccak256();
 
-        let signed_message = secp256k1::Message::parse(&hashed_msg);
-        let recovered_pub = secp256k1::recover(&signed_message, &signature, &recovery)
+        let signed_message = libsecp256k1::Message::parse(&hashed_msg);
+        let recovered_pub = libsecp256k1::recover(&signed_message, &signature, &recovery)
             .map_err(|_| CryptoError::RecoveryError { sig } )?;
 
         Ok(KeyPair::pubkey_object_to_pubkey(&recovered_pub))

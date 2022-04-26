@@ -48,7 +48,7 @@ pub enum CryptoError {
     /// This error means that a key wasn't vaild.
     /// e.g. PrivateKey, PubliKey, SharedSecret.
     #[cfg(feature = "asymmetric")]
-    KeyError { key_type: &'static str, err: Option<secp256k1::Error> },
+    KeyError { key_type: &'static str, err: Option<libsecp256k1::Error> },
     #[cfg(not(feature = "asymmetric"))]
     KeyError { key_type: &'static str, err: Option<()> },
     /// The `RandomError` error.

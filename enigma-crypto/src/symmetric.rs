@@ -8,7 +8,7 @@
 
 use enigma_types::SymmetricKey;
 use crate::error::CryptoError;
-use ring::aead::{self, Nonce, Aad};
+use crate::ring::{aead, error};
 use crate::localstd::borrow::ToOwned;
 use crate::localstd::option::Option;
 use crate::localstd::vec::Vec;
@@ -21,6 +21,23 @@ static AES_MODE: &aead::Algorithm = &aead::AES_256_GCM;
 const IV_SIZE: usize = 96/8;
 /// Type alias for the IV byte array
 type IV = [u8; IV_SIZE];
+
+/// `OneNonceSequence` is a Generic Nonce sequence
+pub struct OneNonceSequence(Option<aead::Nonce>);
+
+impl OneNonceSequence {
+    /// Constructs the sequence allowing `advance()` to be called
+    /// `allowed_invocations` times.
+    fn new(nonce: aead::Nonce) -> Self {
+        Self(Some(nonce))
+    }
+}
+
+impl aead::NonceSequence for OneNonceSequence {
+    fn advance(&mut self) -> Result<aead::Nonce, error::Unspecified> {
+        self.0.take().ok_or(error::Unspecified)
+    }
+}
 
 /// This function get's a key and a slice of data and encrypts the data using the key.
 /// the IV/nonce is appended to the cipher text after the MAC tag.
@@ -38,20 +55,24 @@ pub fn encrypt_with_nonce(message: &[u8], key: &SymmetricKey, _iv: Option<IV>) -
             _tmp_iv
         }
     };
-    let aes_encrypt = aead::SealingKey::new(&AES_MODE, key)
+
+    let aes_encrypt = aead::UnboundKey::new(&AES_MODE, key)
         .map_err(|_| CryptoError::KeyError{ key_type: "Encryption", err: None })?;
 
     let mut in_out = message.to_owned();
     let tag_size = AES_MODE.tag_len();
     in_out.extend(vec![0u8; tag_size]);
-    let seal_size = {
-        let iv = Nonce::assume_unique_for_key(iv);
-        aead::seal_in_place(&aes_encrypt, iv, Aad::empty(), &mut in_out, tag_size)
+
+    let _seal_size = {
+        let iv = aead::Nonce::assume_unique_for_key(iv);
+        let nonce_sequence = OneNonceSequence::new(iv);
+        let mut seal_key: aead::SealingKey<OneNonceSequence> = aead::BoundKey::new(aes_encrypt, nonce_sequence);
+        seal_key.seal_in_place_append_tag(aead::Aad::empty(), &mut in_out)
             .map_err(|_| CryptoError::EncryptionError)
     }?;
 
-    in_out.truncate(seal_size);
-    in_out.extend_from_slice(&iv);
+    // in_out.truncate(seal_size);
+    // in_out.extend_from_slice(&iv);
     Ok(in_out)
 }
 
@@ -62,13 +83,15 @@ pub fn decrypt(cipheriv: &[u8], key: &SymmetricKey) -> Result<Vec<u8>, CryptoErr
     if cipheriv.len() < IV_SIZE {
         return Err(CryptoError::ImproperEncryption);
     }
-    let aes_decrypt = aead::OpeningKey::new(&AES_MODE, key)
+    let aes_decrypt = aead::UnboundKey::new(&AES_MODE, key)
         .map_err(|_| CryptoError::KeyError { key_type: "Decryption", err: None })?;
 
     let (ciphertext, iv) = cipheriv.split_at(cipheriv.len()-12);
     let nonce = aead::Nonce::try_assume_unique_for_key(&iv).unwrap(); // This Cannot fail because split_at promises that iv.len()==12
+    let nonce_sequence = OneNonceSequence::new(nonce);
     let mut ciphertext = ciphertext.to_owned();
-    let decrypted_data = aead::open_in_place(&aes_decrypt, nonce, Aad::empty(), 0, &mut ciphertext);
+    let mut open_key: aead::OpeningKey<OneNonceSequence>  = aead::BoundKey::new(aes_decrypt, nonce_sequence);
+    let decrypted_data = open_key.open_in_place(aead::Aad::empty(), &mut ciphertext);
     let decrypted_data = decrypted_data.map_err(|_| CryptoError::DecryptionError)?;
 
     Ok(decrypted_data.to_vec())
