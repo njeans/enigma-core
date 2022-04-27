@@ -3,7 +3,7 @@ use enigma_crypto::hash::Keccak256;
 use enigma_crypto::{symmetric, Encryption};
 use enigma_types::{Hash256, ContractAddress, StateKey};
 use json_patch;
-use rmps::{Deserializer, Serializer};
+use rmp_serde::{Deserializer, Serializer};
 use serde::{Deserialize, Serialize};
 use std::vec::Vec;
 

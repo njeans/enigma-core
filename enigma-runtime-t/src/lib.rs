@@ -14,7 +14,7 @@ extern crate enigma_tools_t;
 extern crate enigma_crypto;
 extern crate enigma_types;
 extern crate json_patch;
-extern crate rmp_serde as rmps;
+extern crate rmp_serde;
 extern crate serde;
 extern crate wasmi;
 extern crate parity_wasm;

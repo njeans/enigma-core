@@ -4,7 +4,7 @@ use enigma_types::{ContractAddress, StateKey};
 use enigma_crypto::{symmetric, Encryption};
 use enigma_types::Hash256;
 use json_patch;
-use rmps::{Deserializer, Serializer};
+use rmp_serde::{Deserializer, Serializer};
 use serde::{Deserialize, Serialize};
 use serde_json::{from_value, Error, Value };
 use std::string::ToString;
