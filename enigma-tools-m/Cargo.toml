@@ -39,7 +39,7 @@ sgx_tstd = { git = "https://github.com/baidu/rust-sgx-sdk.git", optional = true 
 # ethabi_sgx = { package = "ethabi", git = "https://github.com/njeans/ethabi.git", optional = true }
 # ethereum_types_sgx = { package = "ethereum-types", git = "https://github.com/enigmampc/parity-common.git", default-features = false, optional = true }
 # rmp_serde_sgx = { package = "rmp-serde", version = "1.0.0", default-features = false, optional = true }
-rmp_serde_sgx = {package = "rmp-serde", git = "https://github.com/njeans/msgpack-rust.git", branch = "sgx-1.1.3", default-features = false, optional = true }
+rmp_serde_sgx = {package = "rmp-serde", git = "https://github.com/njeans/msgpack-rust.git", default-features = false, optional = true }
 #
 # sgx_tstd = { git = "https://github.com/apache/teaclave-sgx-sdk.git", optional = true }
 serde_sgx = { package = "serde", git = "https://github.com/mesalock-linux/serde-sgx.git", default-features = false, features = ["derive"], optional = true }

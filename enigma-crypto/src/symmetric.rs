@@ -14,6 +14,7 @@ use crate::localstd::option::Option;
 use crate::localstd::vec::Vec;
 use crate::localstd::vec;
 use crate::rand;
+use crate::localstd::println;
 
 static AES_MODE: &aead::Algorithm = &aead::AES_256_GCM;
 
@@ -62,7 +63,7 @@ pub fn encrypt_with_nonce(message: &[u8], key: &SymmetricKey, _iv: Option<IV>) -
     let mut in_out = message.to_owned();
     let tag_size = AES_MODE.tag_len();
     in_out.extend(vec![0u8; tag_size]);
-
+    println!("\tiv={:?}",iv);
     let _seal_size = {
         let iv = aead::Nonce::assume_unique_for_key(iv);
         let nonce_sequence = OneNonceSequence::new(iv);
@@ -70,9 +71,11 @@ pub fn encrypt_with_nonce(message: &[u8], key: &SymmetricKey, _iv: Option<IV>) -
         seal_key.seal_in_place_append_tag(aead::Aad::empty(), &mut in_out)
             .map_err(|_| CryptoError::EncryptionError)
     }?;
-
+    println!("in_out len {:?} tag_size {:?}",in_out.len(), tag_size);
+    println!("\tin_out={:?}",in_out);
     // in_out.truncate(seal_size);
-    // in_out.extend_from_slice(&iv);
+    in_out.extend_from_slice(&iv);
+    println!("in_out after len {:?} {:?}",in_out.len(),in_out);
     Ok(in_out)
 }
 
@@ -91,8 +94,14 @@ pub fn decrypt(cipheriv: &[u8], key: &SymmetricKey) -> Result<Vec<u8>, CryptoErr
     let nonce_sequence = OneNonceSequence::new(nonce);
     let mut ciphertext = ciphertext.to_owned();
     let mut open_key: aead::OpeningKey<OneNonceSequence>  = aead::BoundKey::new(aes_decrypt, nonce_sequence);
-    let decrypted_data = open_key.open_in_place(aead::Aad::empty(), &mut ciphertext);
-    let decrypted_data = decrypted_data.map_err(|_| CryptoError::DecryptionError)?;
+    let decrypted_data = match open_key.open_in_place(aead::Aad::empty(), &mut ciphertext) {
+        Ok(x) => x,
+        Err(e) => {
+            println!("symmetric:decrypt open_in_place err {:?}",e);
+            return Err(CryptoError::DecryptionError);
+        }
+    };
+    // let decrypted_data = decrypted_data.map_err(|_| CryptoError::DecryptionError)?;
 
     Ok(decrypted_data.to_vec())
 }
