@@ -22,7 +22,7 @@ pwasm-utils = { git = "https://github.com/enigmampc/wasm-utils.git", branch = "0
 # serde = { git = "https://github.com/mesalock-linux/serde-sgx.git", rev = "sgx_1.0.9", default-features = false, features=["serde_derive"] }
 # json-patch = { git = "https://github.com/enigmampc/json-patch.git", rev = "0.2.5-sgx-1.0.9", default-features = false }
 wasmi = { git = "https://github.com/enigmampc/wasmi", branch = "0.4.2-sgx-1.0.9" }
-serde_json = { git = "https://github.com/enigmampc/serde-json-sgx.git", branch = "1.0.39-sgx-1.0.9" }
+serde_json = { git = "https://github.com/mesalock-linux/serde-json-sgx.git"}
 
 rmp_serde = { package = "rmp-serde", git = "https://github.com/njeans/msgpack-rust.git", default-features = false }
 serde = { git = "https://github.com/mesalock-linux/serde-sgx.git",  default-features = false, features=["serde_derive"] }

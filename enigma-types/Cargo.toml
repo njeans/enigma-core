@@ -12,10 +12,10 @@ categories = ["no-std"]
 rustc-hex = { version = "2.1.0", default-features = false }
 arrayvec = { version = "0.4.10", default-features = false }
 serde_sgx = { package = "serde", git = "https://github.com/mesalock-linux/serde-sgx.git", optional = true }
-serde_std = { package = "serde", default-features = false, optional = true }
+serde_std = { package = "serde", git = "https://github.com/njeans/serde.git", default-features = false, optional = true }
 
 [build-dependencies]
-cbindgen = "0.8"
+cbindgen = {path = "../../cbindgen"}
 
 [features]
 default = ["serde_std/derive"] # This library is no_std with the default features.
