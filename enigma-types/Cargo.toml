@@ -15,7 +15,7 @@ serde_sgx = { package = "serde", git = "https://github.com/mesalock-linux/serde-
 serde_std = { package = "serde", git = "https://github.com/njeans/serde.git", default-features = false, optional = true }
 
 [build-dependencies]
-cbindgen = {path = "../../cbindgen"}
+cbindgen = {git = "https://github.com/njeans/cbindgen.git"}
 
 [features]
 default = ["serde_std/derive"] # This library is no_std with the default features.
